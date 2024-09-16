@@ -1,5 +1,11 @@
-import type { MetaFunction } from "@remix-run/node";
-
+/* eslint-disable import/no-unresolved */
+import { MetaFunction, json } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+import { useState } from "react";
+// eslint-disable-next-line import/no-unresolved
+import { getPokemons } from "~/api";
+import Header from "~/components/Header";
+import PokeGrid from "~/components/PokeGrid";
 export const meta: MetaFunction = () => {
   return [
     { title: "New Remix App" },
@@ -8,41 +14,29 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data: any = useLoaderData();
+
+  const [pokemons, setPokemons] = useState(data?.results);
+
   return (
-    <div className="font-sans p-4">
-      <h1 className="text-3xl">Welcome to Remix</h1>
-      <ul className="list-disc mt-4 pl-6 space-y-2">
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/start/quickstart"
-            rel="noreferrer"
-          >
-            5m Quick Start
-          </a>
-        </li>
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/start/tutorial"
-            rel="noreferrer"
-          >
-            30m Tutorial
-          </a>
-        </li>
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/docs"
-            rel="noreferrer"
-          >
-            Remix Docs
-          </a>
-        </li>
-      </ul>
+    <div>
+      <Header />
+      <div className="md:flex">
+        <div className="w-6/6 md:w-4/6">
+          <PokeGrid pokemons={pokemons} />
+        </div>
+        <div className="md:w-2/6">Pokemon info</div>
+      </div>
     </div>
   );
+}
+
+export async function loader() {
+  try {
+    const response = await getPokemons();
+    return json(response);
+  } catch (error) {
+    console.error(error);
+  }
 }
